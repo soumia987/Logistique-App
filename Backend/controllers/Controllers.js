@@ -1,13 +1,13 @@
 const User = require('../models/auth')
 const jwt = require('jsonwebtoken');
-const bcryptjs = require('bcryptjs') // Fixed typo: bcrybt -> bcryptjs
+const bcryptjs = require('bcryptjs') 
 const { validationResult } = require('express-validator');
 
 exports.register = async(req, res) => {
     try{
         const errors = validationResult(req);
         if(!errors.isEmpty()) {
-            return res.status(400).json({ // Changed from 401 to 400
+            return res.status(400).json({ 
                 status: 'fail',
                 errors: errors.array()
             });
@@ -16,14 +16,14 @@ exports.register = async(req, res) => {
         const user = await User.findOne({email: req.body.email});
         if(user){
             return res.status(400).json({
-                status: 'fail', // Fixed typo: fails -> fail
-                message: 'User already exists' // Fixed typo: massage -> message
+                status: 'fail', 
+                message: 'Utilisateur deja existé' 
             });
         }
         
         const hashedPassword = await bcryptjs.hash(req.body.password, 12);
         const newUser = await User.create({
-            name: req.body.user, // Map 'user' field to 'name' for consistency
+            name: req.body.user, 
             email: req.body.email,
             phone: req.body.phone,
             password: hashedPassword,
@@ -36,7 +36,7 @@ exports.register = async(req, res) => {
         
         res.status(201).json({
             status: 'success',
-            message: 'User registered successfully', // Fixed typo: registerd -> registered
+            message: 'User registered successfully', 
             token,
             user: {
                 _id: newUser._id,
@@ -80,7 +80,7 @@ exports.login = async(req, res) => {
         const isPasswordValid = await bcryptjs.compare(password, user.password);
 
         if(!isPasswordValid){
-            return res.status(401).json({ // Changed from 403 to 401 for authentication failure
+            return res.status(401).json({ 
                 status: 'fail',
                 message: 'Invalid password'
             })
@@ -93,7 +93,7 @@ exports.login = async(req, res) => {
         res.status(200).json({
             status: 'success',
             token,
-            message: 'Logged in successfully', // Fixed typo: loged -> logged
+            message: 'Logged in successfully', 
             user: {
                 _id: user._id,
                 name: user.name,
