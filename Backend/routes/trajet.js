@@ -1,15 +1,58 @@
-const express = require('express')
-const trajetController = require('../controllers/trajetController')
-const authMiddleware = require('../middlewares/authMiddleware')
+const mongoose = require('mongoose');
 
-const router = express.Router()
+const trajetSchema = new mongoose.Schema({
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  departureLocation: {
+    type: String,
+    required: true,
+  },
+  stops: {
+    type: [String], // intermediate stops
+    default: [],
+  },
+  destination: {
+    type: String,
+    required: true,
+  },
+  departureDate: {
+    type: Date,
+    required: true,
+  },
+  goodsType: {
+    type: String,
+    enum: ['food', 'fragile', 'liquid', 'electronics', 'other'],
+    required: true,
+  },
+  maxDimensions: {
+    length: Number,
+    width: Number,
+    height: Number,
+  },
+  maxWeight: {
+    type: Number, // in kg
+    required: true,
+  },
+  availableCapacity: {
+    type: Number, // in kg
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['active', 'full', 'completed', 'canceled'],
+    default: 'active',
+  },
+  requests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Request',
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  }
+});
 
-router.post('/createTrajet', authMiddleware, trajetController.createTrajet)
-router.get('/getAllTrajets', trajetController.getAllTrajets) 
-router.get('/:id', trajetController.getTrajetById) 
-router.get('/driver/me', authMiddleware, trajetController.getMyTrajets);
-// router.put('/:id', authMiddleware, trajetController.updateTrajet)
-router.delete('/:id', authMiddleware, trajetController.deleteTrajet)
-
-
-module.exports = router
+module.exports = mongoose.model('Trajet', trajetSchema);
