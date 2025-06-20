@@ -1,233 +1,93 @@
-// ==================== COMPOSANT REGISTER ====================
+import React from 'react';
+import {Link }from "react-router-dom"
 
-const Register = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { register: registerUser } = useAuth();
-  const navigate = useNavigate();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({
-    resolver: yupResolver(registerSchema)
-  });
-
-  const onSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-      const { confirmPassword, acceptTerms, ...userData } = data;
-      await registerUser(userData);
-      toast.success('Inscription réussie ! Vérifiez votre email.');
-      navigate('/login');
-    } catch (error) {
-      toast.error(error.message || 'Erreur lors de l\'inscription');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+export default function Register() {
   return (
-    <div className="min-h-screen flex">
-      {/* Section gauche - Invitation à la connexion */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-800 text-white">
-        <div className="max-w-md w-full text-center space-y-6">
-          <h3 className="text-2xl font-bold">Already have an account?</h3>
-          <p className="text-gray-300">
-            Connectez-vous pour accéder à votre espace TransportConnect
-          </p>
-          <Link
-            to="/login"
-            className="inline-block w-full py-3 px-6 border border-white text-white hover:bg-white hover:text-gray-800 transition-colors font-medium"
-          >
-            Login
-          </Link>
-        </div>
+    <form className="flex flex-col gap-3 px-8 pb-2 bg-[#171717] rounded-[25px] transition-transform duration-300 hover:scale-105 hover:border border-black max-w-sm mx-auto">
+      <p className="text-center my-8 text-white text-xl">Register</p>
+
+      <InputField icon={<UserIcon />} placeholder="Full Name" type="text" />
+      <InputField icon={<MailIcon />} placeholder="Email" type="email" />
+      <InputField icon={<LockIcon />} placeholder="Password" type="password" />
+      <InputField icon={<PhoneIcon />} placeholder="Phone Number" type="tel" />
+
+      <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
+        <RoleIcon />
+        <select className="bg-transparent text-gray-300 w-full outline-none border-none">
+          <option className="bg-[#171717] text-white" value="">Select Role</option>
+          <option className="bg-[#171717] text-white" value="user">conducteur</option>
+          <option className="bg-[#171717] text-white" value="admin">expediteur</option>
+        </select>
       </div>
 
-      {/* Section droite - Formulaire d'inscription */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">REGISTER</h2>
-            <p className="text-sm text-gray-600">
-              Créez votre compte TransportConnect
-            </p>
-          </div>
-
-          <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
-            {/* Nom et Prénom */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <input
-                  {...register('nom')}
-                  type="text"
-                  className={`appearance-none relative block w-full px-3 py-3 border ${
-                    errors.nom ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-                  placeholder="Nom"
-                />
-                {errors.nom && (
-                  <p className="mt-1 text-xs text-red-600">{errors.nom.message}</p>
-                )}
-              </div>
-              <div>
-                <input
-                  {...register('prenom')}
-                  type="text"
-                  className={`appearance-none relative block w-full px-3 py-3 border ${
-                    errors.prenom ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-                  placeholder="Prénom"
-                />
-                {errors.prenom && (
-                  <p className="mt-1 text-xs text-red-600">{errors.prenom.message}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <input
-                {...register('email')}
-                type="email"
-                className={`appearance-none relative block w-full px-3 py-3 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-                placeholder="Email"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
-
-            {/* Téléphone */}
-            <div>
-              <input
-                {...register('telephone')}
-                type="tel"
-                className={`appearance-none relative block w-full px-3 py-3 border ${
-                  errors.telephone ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-                placeholder="Téléphone"
-              />
-              {errors.telephone && (
-                <p className="mt-1 text-sm text-red-600">{errors.telephone.message}</p>
-              )}
-            </div>
-
-            {/* Rôle */}
-            <div>
-              <select
-                {...register('role')}
-                className={`appearance-none relative block w-full px-3 py-3 border ${
-                  errors.role ? 'border-red-300' : 'border-gray-300'
-                } text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-              >
-                <option value="">Sélectionnez votre rôle</option>
-                <option value="conducteur">Conducteur</option>
-                <option value="expediteur">Expéditeur</option>
-              </select>
-              {errors.role && (
-                <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
-              )}
-            </div>
-
-            {/* Mot de passe */}
-            <div>
-              <div className="relative">
-                <input
-                  {...register('password')}
-                  type={showPassword ? 'text' : 'password'}
-                  className={`appearance-none relative block w-full pl-3 pr-10 py-3 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-                  placeholder="Mot de passe"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-              )}
-            </div>
-
-            {/* Confirmation mot de passe */}
-            <div>
-              <div className="relative">
-                <input
-                  {...register('confirmPassword')}
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  className={`appearance-none relative block w-full pl-3 pr-10 py-3 border ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 sm:text-sm`}
-                  placeholder="Confirmer le mot de passe"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-
-            {/* Acceptation des conditions */}
-            <div className="flex items-center">
-              <input
-                {...register('acceptTerms')}
-                type="checkbox"
-                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-gray-900">
-                J'accepte les{' '}
-                <Link to="/terms" className="text-gray-600 hover:text-gray-900">
-                  conditions d'utilisation
-                </Link>
-              </label>
-            </div>
-            {errors.acceptTerms && (
-              <p className="text-sm text-red-600">{errors.acceptTerms.message}</p>
-            )}
-
-            {/* Bouton d'inscription */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  'REGISTER'
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+      <div className="flex justify-center gap-2 mt-10">
+        <button
+          type="submit"
+          className="bg-[#252525] text-white px-8 py-2 rounded-md transition duration-300 hover:bg-black"
+        >
+          Register
+        </button>
+        <button
+          type="button"
+          className="bg-[#252525] text-white px-6 py-2 rounded-md transition duration-300 hover:bg-black"
+        >
+          Login
+        </button>
       </div>
+    </form>
+  );
+}
+
+function InputField({ icon, placeholder, type }) {
+  return (
+    <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
+      {icon}
+      <input
+        type={type}
+        placeholder={placeholder}
+        required
+        className="bg-transparent border-none outline-none w-full text-gray-300"
+      />
     </div>
   );
-};
+}
 
-export { Login, Register };
+function UserIcon() {
+  return (
+    <svg className="h-5 w-5 fill-white" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg className="h-5 w-5 fill-white" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 4a2 2 0 012-2h12a2 2 0 012 2v.217l-8 4.8-8-4.8V4zm0 1.383v6.634L5.803 8.21 0 5.383zM6.761 8.83l-6.761 4.06A2 2 0 002 14h12a2 2 0 001.999-1.11l-6.76-4.06-1.12.672-1.12-.672zM10.197 8.21L16 12.017V5.383l-5.803 2.827z" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg className="h-5 w-5 fill-white" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zM3 7V3a5 5 0 0110 0v4a2 2 0 012 2v5a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z" />
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg className="h-5 w-5 fill-white" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <path d="M391 351c-19-3-37-6-55-10-13-3-27 2-35 12l-27 27c-53-27-97-69-127-121l27-28c9-9 13-22 10-35-4-18-7-37-10-56-2-13-13-23-26-23H84c-15 0-28 13-26 28 17 161 144 288 305 305 15 2 28-11 28-26v-60c0-13-10-24-23-26z" />
+    </svg>
+  );
+}
+
+function RoleIcon() {
+  return (
+    <svg className="h-5 w-5 fill-white" viewBox="0 0 640 512" xmlns="http://www.w3.org/2000/svg">
+      <path d="M96 96a96 96 0 1 1 0 192 96 96 0 1 1 0-192zm352 48a80 80 0 1 1 0 160 80 80 0 1 1 0-160zm192 240c0 44.2-35.8 80-80 80H80c-44.18 0-80-35.8-80-80 0-52.9 43.1-96 96-96h64c17.67 0 32 14.3 32 32s14.33 32 32 32h192c17.7 0 32-14.3 32-32s14.3-32 32-32h64c52.9 0 96 43.1 96 96z" />
+    </svg>
+  );
+}

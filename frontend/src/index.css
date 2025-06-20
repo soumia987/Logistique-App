@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.title-custom::before,
+.title-custom::after {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  left: 0;
+  background-color: royalblue;
+}
+
+.title-custom::after {
+  animation: pulse 1s linear infinite;
+  opacity: 1;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
