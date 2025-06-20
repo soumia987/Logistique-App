@@ -9,6 +9,8 @@ export default function Register() {
       <InputField icon={<UserIcon />} placeholder="Full Name" type="text" />
       <InputField icon={<MailIcon />} placeholder="Email" type="email" />
       <InputField icon={<LockIcon />} placeholder="Password" type="password" />
+      <InputField icon={<LockIcon />} placeholder="ConfirmPassword" type="password" />
+
       <InputField icon={<PhoneIcon />} placeholder="Phone Number" type="tel" />
 
       <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
