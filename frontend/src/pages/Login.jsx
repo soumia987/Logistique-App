@@ -1,71 +1,167 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useAuth } from '../context/AuthContext';
+import { Truck, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
-export default function Login() {
+const schema = yup.object({
+  email: yup.string().email('Email invalide').required('Email requis'),
+  motDePasse: yup.string().required('Mot de passe requis'),
+}).required();
+
+const Login = () => {
+  const { login, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = async (data) => {
+    const result = await login(data);
+    if (result.success) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  };
+
   return (
-    <form className="flex flex-col gap-3 px-8 pb-2 bg-[#171717] rounded-[25px] transition-transform duration-300 hover:scale-105 hover:border border-black max-w-sm mx-auto">
-      <p id="heading" className="text-center my-8 text-white text-xl">
-        Login
-      </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <div className="flex justify-center">
+            <Truck className="h-12 w-12 text-blue-600" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Connexion à votre compte
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Ou{' '}
+            <Link
+              to="/register"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              créez un nouveau compte
+            </Link>
+          </p>
+        </div>
 
-      {/* Username Field */}
-      <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
-        <UserIcon />
-        <input
-          type="text"
-          placeholder="Username"
-          autoComplete="off"
-          className="bg-transparent border-none outline-none w-full text-gray-300"
-        />
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('email')}
+                  type="email"
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="votre@email.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="motDePasse" className="block text-sm font-medium text-gray-700">
+                Mot de passe
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('motDePasse')}
+                  type={showPassword ? 'text' : 'password'}
+                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Votre mot de passe"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {errors.motDePasse && (
+                <p className="mt-1 text-sm text-red-600">{errors.motDePasse.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Se souvenir de moi
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                Mot de passe oublié ?
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Connexion en cours...
+                </div>
+              ) : (
+                'Se connecter'
+              )}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Pas encore de compte ?{' '}
+              <Link
+                to="/register"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Inscrivez-vous ici
+              </Link>
+            </p>
+          </div>
+        </form>
       </div>
-
-      {/* Password Field */}
-      <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
-        <LockIcon />
-        <input
-          type="password"
-          placeholder="Password"
-          className="bg-transparent border-none outline-none w-full text-gray-300"
-        />
-      </div>
-
-      {/* Buttons */}
-      <div className="flex justify-center gap-2 mt-10">
-        <button
-          type="submit"
-          className="bg-[#252525] text-white px-4 py-2 rounded-md transition duration-300 hover:bg-black"
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          className="bg-[#252525] text-white px-8 py-2 rounded-md transition duration-300 hover:bg-black"
-        >
-          Sign Up
-        </button>
-      </div>
-
-      <button
-        type="button"
-        className="mt-6 mb-8 bg-[#252525] text-white px-4 py-2 rounded-md transition duration-300 hover:bg-red-600"
-      >
-        Forgot Password
-      </button>
-    </form>
+    </div>
   );
-}
+};
 
-function UserIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-      <path d="M13.106 7.222c0-2.967-2.249-5.032-5.482-5.032-3.35 0-5.646 2.318-5.646 5.702 0 3.493 2.235 5.708 5.762 5.708.862 0 1.689-.123 2.304-.335v-.862c-.43.199-1.354.328-2.29.328-2.926 0-4.813-1.88-4.813-4.798 0-2.844 1.921-4.881 4.594-4.881 2.735 0 4.608 1.688 4.608 4.156 0 1.682-.554 2.769-1.416 2.769-.492 0-.772-.28-.772-.76V5.206H8.923v.834h-.11c-.266-.595-.881-.964-1.6-.964-1.4 0-2.378 1.162-2.378 2.823 0 1.737.957 2.906 2.379 2.906.8 0 1.415-.39 1.709-1.087h.11c.081.67.703 1.148 1.503 1.148 1.572 0 2.57-1.415 2.57-3.643zm-7.177.704c0-1.197.54-1.907 1.456-1.907.93 0 1.524.738 1.524 1.907S8.308 9.84 7.371 9.84c-.895 0-1.442-.725-1.442-1.914z" />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-      <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-    </svg>
-  );
-}
+export default Login;

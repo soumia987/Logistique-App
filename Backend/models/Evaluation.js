@@ -29,3 +29,9 @@ const evaluationSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Empecher les evaluations multiples pour la meme demande
+evaluationSchema.index({ evaluateur: 1, demandeTransport: 1 }, { unique: true });
+evaluationSchema.index({ evalue: 1 });
+
+module.exports = mongoose.model('Evaluation', evaluationSchema);

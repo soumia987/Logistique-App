@@ -1,4 +1,3 @@
-
 // models/DemandeTransport.js
 const mongoose = require('mongoose');
 
@@ -48,6 +47,10 @@ const demandeTransportSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Index pour améliorer les performances
+demandeTransportSchema.index({ expediteur: 1, statut: 1 });
+demandeTransportSchema.index({ annonce: 1, statut: 1 });
 
 module.exports = mongoose.model('DemandeTransport', demandeTransportSchema);
 

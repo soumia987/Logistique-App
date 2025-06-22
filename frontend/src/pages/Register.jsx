@@ -1,95 +1,271 @@
-import React from 'react';
-import {Link }from "react-router-dom"
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useAuth } from '../context/AuthContext';
+import { Truck, Eye, EyeOff, User, Mail, Lock, Phone } from 'lucide-react';
 
-export default function Register() {
+const schema = yup.object({
+  nom: yup.string().required('Nom requis'),
+  prenom: yup.string().required('Prénom requis'),
+  email: yup.string().email('Email invalide').required('Email requis'),
+  telephone: yup.string().required('Téléphone requis'),
+  motDePasse: yup.string()
+    .min(6, 'Le mot de passe doit contenir au moins 6 caractères')
+    .required('Mot de passe requis'),
+  confirmPassword: yup.string()
+    .oneOf([yup.ref('motDePasse'), null], 'Les mots de passe doivent correspondre')
+    .required('Confirmation du mot de passe requise'),
+  role: yup.string().oneOf(['conducteur', 'expediteur'], 'Rôle invalide').required('Rôle requis'),
+}).required();
+
+const Register = () => {
+  const { register: registerUser, loading } = useAuth();
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = async (data) => {
+    const { confirmPassword, ...userData } = data;
+    const result = await registerUser(userData);
+    if (result.success) {
+      navigate('/dashboard');
+    }
+  };
+
   return (
-    <form className="flex flex-col gap-3 px-8 pb-2 bg-[#171717] rounded-[25px] transition-transform duration-300 hover:scale-105 hover:border border-black max-w-sm mx-auto">
-      <p className="text-center my-8 text-white text-xl">Register</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <div className="flex justify-center">
+            <Truck className="h-12 w-12 text-blue-600" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Créer votre compte
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Ou{' '}
+            <Link
+              to="/login"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              connectez-vous à votre compte existant
+            </Link>
+          </p>
+        </div>
 
-      <InputField icon={<UserIcon />} placeholder="Full Name" type="text" />
-      <InputField icon={<MailIcon />} placeholder="Email" type="email" />
-      <InputField icon={<LockIcon />} placeholder="Password" type="password" />
-      <InputField icon={<LockIcon />} placeholder="ConfirmPassword" type="password" />
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            {/* Name Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="prenom" className="block text-sm font-medium text-gray-700">
+                  Prénom
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    {...register('prenom')}
+                    type="text"
+                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Votre prénom"
+                  />
+                </div>
+                {errors.prenom && (
+                  <p className="mt-1 text-sm text-red-600">{errors.prenom.message}</p>
+                )}
+              </div>
 
-      <InputField icon={<PhoneIcon />} placeholder="Phone Number" type="tel" />
+              <div>
+                <label htmlFor="nom" className="block text-sm font-medium text-gray-700">
+                  Nom
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    {...register('nom')}
+                    type="text"
+                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Votre nom"
+                  />
+                </div>
+                {errors.nom && (
+                  <p className="mt-1 text-sm text-red-600">{errors.nom.message}</p>
+                )}
+              </div>
+            </div>
 
-      <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
-        <RoleIcon />
-        <select className="bg-transparent text-gray-300 w-full outline-none border-none">
-          <option className="bg-[#171717] text-white" value="">Select Role</option>
-          <option className="bg-[#171717] text-white" value="user">conducteur</option>
-          <option className="bg-[#171717] text-white" value="admin">expediteur</option>
-        </select>
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('email')}
+                  type="email"
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="votre@email.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Phone Field */}
+            <div>
+              <label htmlFor="telephone" className="block text-sm font-medium text-gray-700">
+                Téléphone
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('telephone')}
+                  type="tel"
+                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Votre numéro de téléphone"
+                />
+              </div>
+              {errors.telephone && (
+                <p className="mt-1 text-sm text-red-600">{errors.telephone.message}</p>
+              )}
+            </div>
+
+            {/* Role Selection */}
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Type de compte
+              </label>
+              <select
+                {...register('role')}
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              >
+                <option value="">Sélectionnez votre rôle</option>
+                <option value="expediteur">Expéditeur</option>
+                <option value="conducteur">Conducteur</option>
+              </select>
+              {errors.role && (
+                <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="motDePasse" className="block text-sm font-medium text-gray-700">
+                Mot de passe
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('motDePasse')}
+                  type={showPassword ? 'text' : 'password'}
+                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Votre mot de passe"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {errors.motDePasse && (
+                <p className="mt-1 text-sm text-red-600">{errors.motDePasse.message}</p>
+              )}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirmer le mot de passe
+              </label>
+              <div className="mt-1 relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register('confirmPassword')}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Confirmez votre mot de passe"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Inscription en cours...
+                </div>
+              ) : (
+                'Créer mon compte'
+              )}
+            </button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Déjà un compte ?{' '}
+              <Link
+                to="/login"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Connectez-vous ici
+              </Link>
+            </p>
+          </div>
+        </form>
       </div>
-
-      <div className="flex justify-center gap-2 mt-10">
-        <button
-          type="submit"
-          className="bg-[#252525] text-white px-8 py-2 rounded-md transition duration-300 hover:bg-black"
-        >
-          Register
-        </button>
-        <button
-          type="button"
-          className="bg-[#252525] text-white px-6 py-2 rounded-md transition duration-300 hover:bg-black"
-        >
-          Login
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function InputField({ icon, placeholder, type }) {
-  return (
-    <div className="flex items-center gap-2 rounded-[25px] px-4 py-2 bg-[#171717] shadow-inner text-white">
-      {icon}
-      <input
-        type={type}
-        placeholder={placeholder}
-        required
-        className="bg-transparent border-none outline-none w-full text-gray-300"
-      />
     </div>
   );
-}
+};
 
-function UserIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-    </svg>
-  );
-}
-
-function MailIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0 4a2 2 0 012-2h12a2 2 0 012 2v.217l-8 4.8-8-4.8V4zm0 1.383v6.634L5.803 8.21 0 5.383zM6.761 8.83l-6.761 4.06A2 2 0 002 14h12a2 2 0 001.999-1.11l-6.76-4.06-1.12.672-1.12-.672zM10.197 8.21L16 12.017V5.383l-5.803 2.827z" />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 1a2 2 0 012 2v4H6V3a2 2 0 012-2zM3 7V3a5 5 0 0110 0v4a2 2 0 012 2v5a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z" />
-    </svg>
-  );
-}
-
-function PhoneIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-      <path d="M391 351c-19-3-37-6-55-10-13-3-27 2-35 12l-27 27c-53-27-97-69-127-121l27-28c9-9 13-22 10-35-4-18-7-37-10-56-2-13-13-23-26-23H84c-15 0-28 13-26 28 17 161 144 288 305 305 15 2 28-11 28-26v-60c0-13-10-24-23-26z" />
-    </svg>
-  );
-}
-
-function RoleIcon() {
-  return (
-    <svg className="h-5 w-5 fill-white" viewBox="0 0 640 512" xmlns="http://www.w3.org/2000/svg">
-      <path d="M96 96a96 96 0 1 1 0 192 96 96 0 1 1 0-192zm352 48a80 80 0 1 1 0 160 80 80 0 1 1 0-160zm192 240c0 44.2-35.8 80-80 80H80c-44.18 0-80-35.8-80-80 0-52.9 43.1-96 96-96h64c17.67 0 32 14.3 32 32s14.33 32 32 32h192c17.7 0 32-14.3 32-32s14.3-32 32-32h64c52.9 0 96 43.1 96 96z" />
-    </svg>
-  );
-}
+export default Register;
